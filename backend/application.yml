@@ -13,6 +13,10 @@ spring:
     password: 12345678
     driver-class-name: org.mariadb.jdbc.Driver
 
+    jwt:
+  secret: ${JWT_SECRET}
+
+
   jpa:
     hibernate:
       ddl-auto: update
