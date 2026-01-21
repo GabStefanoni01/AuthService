@@ -1,11 +1,15 @@
 package com.gabriel.authapi.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.gabriel.authapi.domain.entity.RefreshToken;
 import com.gabriel.authapi.domain.entity.User;
 import com.gabriel.authapi.dto.LoginRequest;
 import com.gabriel.authapi.dto.LoginResponse;
+import com.gabriel.authapi.repository.RefreshTokenRepository;
 import com.gabriel.authapi.repository.UserRepository;
 import com.gabriel.authapi.security.jwt.JwtService;
 
@@ -13,11 +17,18 @@ import com.gabriel.authapi.security.jwt.JwtService;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AuthService(UserRepository userRepository, JwtService jwtService) {
+    public AuthService(
+            UserRepository userRepository,
+            RefreshTokenRepository refreshTokenRepository,
+            JwtService jwtService
+    ) {
         this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.jwtService = jwtService;
     }
 
@@ -30,10 +41,26 @@ public class AuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        String accessToken = jwtService.generateAccessToken(user.getEmail());
-        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+        // Revoga todos os refresh tokens antigos do usuário
+        refreshTokenRepository.findAll().stream()
+                .filter(rt -> rt.getUser().getId().equals(user.getId()) && !rt.isRevoked())
+                .forEach(rt -> {
+                    rt.setRevoked(true);
+                    refreshTokenRepository.save(rt);
+                });
 
-        return new LoginResponse(accessToken, refreshToken);
+        String accessToken = jwtService.generateAccessToken(user.getEmail());
+        String refreshTokenValue = jwtService.generateRefreshToken(user.getEmail());
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(refreshTokenValue);
+        refreshToken.setUser(user);
+        refreshToken.setExpiresAt(
+        LocalDateTime.now().plusDays(7)
+    );
+
+        refreshTokenRepository.save(refreshToken);
+
+        return new LoginResponse(accessToken, refreshTokenValue);
     }
 }
-
