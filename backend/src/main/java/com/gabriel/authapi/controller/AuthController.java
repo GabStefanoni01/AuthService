@@ -2,16 +2,18 @@ package com.gabriel.authapi.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.gabriel.authapi.dto.LoginRequest;
 import com.gabriel.authapi.dto.LoginResponse;
+import com.gabriel.authapi.dto.RefreshTokenRequest;
 import com.gabriel.authapi.dto.RegisterRequest;
 import com.gabriel.authapi.dto.UserResponse;
+import com.gabriel.authapi.domain.entity.RefreshToken;
+import com.gabriel.authapi.domain.entity.User;
+import com.gabriel.authapi.security.jwt.JwtService;
 import com.gabriel.authapi.service.AuthService;
+import com.gabriel.authapi.service.RefreshTokenService;
 import com.gabriel.authapi.service.UserService;
 
 @RestController
@@ -20,10 +22,19 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtService jwtService;
 
-    public AuthController(UserService userService, AuthService authService) {
+    public AuthController(
+            UserService userService,
+            AuthService authService,
+            RefreshTokenService refreshTokenService,
+            JwtService jwtService) {
+
         this.userService = userService;
         this.authService = authService;
+        this.refreshTokenService = refreshTokenService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -40,5 +51,30 @@ public class AuthController {
 
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(
+            @RequestBody RefreshTokenRequest request) {
+
+        RefreshToken refreshToken =
+                refreshTokenService.validate(request.getRefreshToken());
+
+        User user = refreshToken.getUser();
+
+        // revoga o refresh token atual
+        refreshTokenService.revoke(refreshToken);
+
+        String newAccessToken =
+                jwtService.generateAccessToken(user.getEmail());
+
+        String newRefreshToken =
+                jwtService.generateRefreshToken(user.getEmail());
+
+        refreshTokenService.create(user, newRefreshToken);
+
+        return ResponseEntity.ok(
+                new LoginResponse(newAccessToken, newRefreshToken)
+        );
     }
 }

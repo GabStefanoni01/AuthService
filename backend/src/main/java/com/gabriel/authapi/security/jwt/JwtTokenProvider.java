@@ -10,7 +10,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "654A_dborUODHWD8456zOrgv";
+    private final String jwtSecret = "9f8d7a6c5b4a3e2f1a9c8b7d6e5f4a3b";
     private final long jwtExpirationMs = 900000; // 15 minutos
 
     public String generateToken(String subject) {
