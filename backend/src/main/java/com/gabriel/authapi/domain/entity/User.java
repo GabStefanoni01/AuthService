@@ -22,6 +22,12 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    private int failedLoginAttempts;
+
+    private LocalDateTime lockUntil;
+
+
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -125,5 +131,22 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
+    public int getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public void setFailedLoginAttempts(int failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public LocalDateTime getLockUntil() {
+        return lockUntil;
+    }
+
+    public void setLockUntil(LocalDateTime lockUntil) {
+        this.lockUntil = lockUntil;
+    }
+
+    
     
 }
