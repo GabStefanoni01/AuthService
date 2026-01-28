@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.gabriel.authapi.dto.LoginRequest;
 import com.gabriel.authapi.dto.LoginResponse;
+import com.gabriel.authapi.dto.LogoutRequest;
 import com.gabriel.authapi.dto.RefreshTokenRequest;
 import com.gabriel.authapi.dto.RegisterRequest;
 import com.gabriel.authapi.dto.UserResponse;
@@ -44,6 +45,16 @@ public class AuthController {
         UserResponse response = userService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("/logout")
+     public ResponseEntity<Void> logout(
+        @RequestBody LogoutRequest request) {
+
+    refreshTokenService.revokeByToken(request.getRefreshToken());
+
+    return ResponseEntity.noContent().build();
+}
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(

@@ -13,7 +13,6 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    // duração do refresh token (ex: 7 dias)
     private static final long REFRESH_TOKEN_DAYS = 7;
 
     public RefreshTokenService(RefreshTokenRepository refreshTokenRepository) {
@@ -43,10 +42,10 @@ public class RefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setToken(token);
-        refreshToken.setRevoked(false);
         refreshToken.setExpiresAt(
                 LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS)
         );
+        refreshToken.setRevoked(false);
 
         refreshTokenRepository.save(refreshToken);
     }
@@ -54,5 +53,16 @@ public class RefreshTokenService {
     public void revoke(RefreshToken refreshToken) {
         refreshToken.setRevoked(true);
         refreshTokenRepository.save(refreshToken);
+    }
+
+    public void revokeByToken(String token) {
+
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+
+        if (!refreshToken.isRevoked()) {
+            refreshToken.setRevoked(true);
+            refreshTokenRepository.save(refreshToken);
+        }
     }
 }
