@@ -10,8 +10,15 @@ import com.gabriel.authapi.domain.entity.User;
 import com.gabriel.authapi.security.jwt.JwtService;
 import com.gabriel.authapi.service.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/auth")
+@Tag(
+    name = "Authentication",
+    description = "Endpoints de autenticação, sessão e recuperação de senha"
+)
 public class AuthController {
 
     private final UserService userService;
@@ -35,8 +42,11 @@ public class AuthController {
         this.passwordRecoveryService = passwordRecoveryService;
     }
 
-    // ================= REGISTER =================
 
+    @Operation(
+        summary = "Registrar usuário",
+        description = "Cria uma nova conta de usuário"
+    )
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(
             @RequestBody RegisterRequest request) {
@@ -45,8 +55,11 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // ================= LOGIN =================
 
+    @Operation(
+        summary = "Login",
+        description = "Autentica o usuário e retorna access e refresh token"
+    )
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody LoginRequest request) {
@@ -55,8 +68,11 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // ================= LOGOUT =================
 
+    @Operation(
+        summary = "Logout",
+        description = "Revoga o refresh token e encerra a sessão"
+    )
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @RequestBody LogoutRequest request) {
@@ -66,8 +82,11 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    // ================= REFRESH =================
 
+    @Operation(
+        summary = "Renovar token",
+        description = "Gera novos tokens a partir de um refresh token válido"
+    )
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(
             @RequestBody RefreshTokenRequest request) {
@@ -93,8 +112,11 @@ public class AuthController {
         );
     }
 
-    // ================= PASSWORD RECOVERY =================
 
+    @Operation(
+        summary = "Recuperar senha",
+        description = "Gera token de recuperação e simula envio por email"
+    )
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(
             @RequestBody ForgotPasswordRequest request) {
@@ -104,6 +126,10 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+        summary = "Resetar senha",
+        description = "Valida token e atualiza a senha do usuário"
+    )
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(
             @RequestBody ResetPasswordRequest request) {
