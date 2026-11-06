@@ -60,3 +60,24 @@ Configure estas variáveis de ambiente no Render:
 - `JWT_SECRET`: segredo aleatório forte, com pelo menos 32 bytes
 
 Não versione credenciais ou arquivos `.env`. O schema inicial é criado/atualizado pelo Hibernate (`ddl-auto=update`).
+
+
+## Swagger UI e testes da API
+
+Com a aplicação em execução, acesse:
+
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Health check: `http://localhost:8080/health`
+
+No Render, substitua o host local pelo domínio público do serviço.
+
+### Fluxo de teste sugerido
+
+1. Execute `POST /auth/register` para cadastrar um usuário.
+2. Execute `POST /auth/login` com o mesmo e-mail e senha.
+3. Copie o valor de `accessToken) retornado pelo login.
+4. Clique em **Authorize** no Swagger e informe o access token (sem o prefixo `Bearer `, pois o Swagger adiciona esse prefixo automaticamente).
+5. Execute `GET /api/me` para validar a autenticação JWT. Sem token válido, a rota responde `401 Unauthorized`.
+
+As rotas de cadastro, login, refresh, logout e recuperação de senha são públicas porque fazem parte do fluxo de autenticação. As demais rotas exigem um access token JWT válido.
