@@ -3,6 +3,7 @@ package com.gabriel.authapi.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -10,8 +11,11 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "9f8d7a6c5b4a3e2f1a9c8b7d6e5f4a3b";
-    private final long jwtExpirationMs = 900000; // 15 minutos
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.access-token-expiration:900000}")
+    private long jwtExpirationMs;
 
     public String generateToken(String subject) {
         return Jwts.builder()
