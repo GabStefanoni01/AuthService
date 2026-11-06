@@ -76,7 +76,7 @@ No Render, substitua o host local pelo domínio público do serviço.
 
 1. Execute `POST /auth/register` para cadastrar um usuário.
 2. Execute `POST /auth/login` com o mesmo e-mail e senha.
-3. Copie o valor de `accessToken) retornado pelo login.
+3. Copie o valor de `accessToken` retornado pelo login.
 4. Clique em **Authorize** no Swagger e informe o access token (sem o prefixo `Bearer `, pois o Swagger adiciona esse prefixo automaticamente).
 5. Execute `GET /api/me` para validar a autenticação JWT. Sem token válido, a rota responde `401 Unauthorized`.
 
