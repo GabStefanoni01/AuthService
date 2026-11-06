@@ -1,39 +1,38 @@
-version: "3.9"
-
 services:
-
   db:
-    image: mariadb:11
+    image: postgres:16-alpine
     container_name: auth-db
-    restart: always
-
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: auth_db
-
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: local_dev_password
     ports:
-      - "3306:3306"
-
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/mysql
-
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   api:
-    build: .
+    build:
+      context: ..
+      dockerfile: Dockerfile
     container_name: auth-api
-    restart: always
-
+    restart: unless-stopped
     depends_on:
-      - db
-
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
-
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/auth_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
-      JWT_SECRET: mysupersecretjwtkey123456
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: auth_user
+      SPRING_DATASOURCE_PASSWORD: local_dev_password
+      JWT_SECRET: local-development-secret-change-before-production-123456
 
 volumes:
   db_data:
