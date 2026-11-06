@@ -4,6 +4,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.gabriel.authapi.domain.entity.User;
+import com.gabriel.authapi.domain.enums.Role;
 import com.gabriel.authapi.dto.RegisterRequest;
 import com.gabriel.authapi.dto.UserResponse;
 import com.gabriel.authapi.repository.UserRepository;
@@ -28,6 +29,7 @@ public class UserService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
 
